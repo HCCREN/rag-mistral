@@ -2,7 +2,7 @@
 # Bilingual (EN + 中文) README for a Python RAG CLI system using Mistral 7B Q6_K and FAISS
 
 <p align="center">
-  <img src="https://raw.githubusercontent.com/HCCREN/rag-mistral-cli/main/banner.png" alt="RAG Mistral CLI Banner" width="100%">
+  <img src="https://raw.githubusercontent.com/HCCREN/rag-mistral/main/banner.png" alt="RAG Mistral CLI Banner" width="100%">
 </p>
 
 <h1 align="center">🔍 RAG-Mistral-CLI | Document Q&A System (Mistral 7B + FAISS) | 文檔問答系統</h1>
