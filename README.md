@@ -1,85 +1,71 @@
-# rag_mistral.py
-# Bilingual (EN + 中文) README for a Python RAG CLI system using Mistral 7B Q6_K and FAISS
+# README.md（根據最新版 Python 程式碼同步）
 
 <p align="center">
-  <img src="https://raw.githubusercontent.com/HCCREN/rag-mistral/main/banner1.png" alt="RAG Mistral CLI Banner" width="100%">
+  <img src="https://raw.githubusercontent.com/HCCREN/rag-mistral-cli/main/banner.png" alt="RAG Mistral CLI Banner" width="100%">
 </p>
 
-<h1 align="center">🔍 RAG-Mistral-CLI | Document Q&A System (Mistral 7B + FAISS) | 文檔問答系統</h1>
+<h1 align="center">📚 RAG-Mistral-CLI | 高效離線文件問答系統</h1>
 
 <p align="center">
-  <b>Offline RAG-powered chatbot for PDFs and text documents, built with FAISS + Mistral 7B</b><br>
-  離線文件問答系統，支援 PDF 與 TXT 文件，使用 FAISS 與 Mistral 7B GGUF 模型。
+  支援 PDF/TXT 文件，具備摘要處理、頁面標註、快速搜尋與本地化推論功能
 </p>
 
 ---
 
-## 📦 Features | 功能特色
+## 🚀 功能總覽 | Features
 
-- 🧠 Mistral 7B (GGUF Q6_K) via `llama-cpp-python`
-- 🔍 Embedding with `SentenceTransformer (GTE-small)`
-- 💾 Vector search with FAISS
-- 📄 Supports `.txt` and `.pdf` documents
-- 💻 CPU-only, runs fully offline
+- 🧠 Mistral 7B (Q6_K, GGUF) 本地 LLM via `llama-cpp-python`
+- 🧾 PDF 多頁處理 + chunk 切割（使用 LangChain `RecursiveCharacterTextSplitter`）
+- 📝 長段落自動摘要（`distilbart`）提升效率與準確性
+- 🔍 內建 FAISS 向量資料庫支援 `top_k` 向量檢索
+- 📌 每段回答皆附帶原始 PDF 頁碼來源
+- 💻 離線運行、無需 GPU、支援 Windows（含安裝教學）
 
 ---
 
-## 🧰 Requirements | 環境需求
+## 🧰 環境需求 | Requirements
 
-- ✅ Python 3.10 (strongly recommended)
+- ✅ Python 3.10（強烈建議）
 - ✅ CMake
-- ✅ Visual Studio Build Tools 2022 with:
-  - ✅ Windows 11 SDK (10.0.22000.0 or higher 可接受)
-  - ✅ MSVC v143 - VS 2022 C++ x64/x86 build tools
-  - ✅ **Visual C++ tools** and **Visual Basic build tools** (必要！)
+- ✅ Visual Studio Build Tools 2022：
+  - Windows 11 SDK
+  - MSVC v143
+  - Visual C++ 與 Visual Basic Build Tools
 
-- 安裝所需套件：
+---
+
+## 📦 安裝步驟 | Installation
 
 ```bash
+# 建立虛擬環境
+python -m venv env
+env\Scripts\activate  # Windows
+
+# 安裝套件
 pip install -r requirements.txt
 ```
 
+> 若安裝 `llama-cpp-python` 失敗，請使用「x64 Native Tools Command Prompt for VS 2022」執行。
+
 ---
 
-## 🛠 llama-cpp-python Installation (Windows 安裝指引 / English + 中文)
-
-If you get build errors while installing `llama-cpp-python`, follow these steps:
-若你在安裝 `llama-cpp-python` 遇到錯誤，請依下列步驟安裝：
+## 🧠 模型下載 | Download Mistral Model
 
 ```bash
-# Create Python 3.10 virtual environment / 建立 Python 虛擬環境
-python -m venv env
-env\Scripts\activate
-
-# Upgrade pip and install cmake / 更新 pip 並安裝 cmake
-python -m pip install --upgrade pip
-pip install cmake
-
-# ✅ Install Visual Studio Build Tools (via installer)
-# 必選項目：
-# - ✅ Windows 10 或 Windows 11 SDK (>= 10.0.22000.0)
-# - ✅ MSVC v143 (VS 2022 C++ x64/x86 build tools)
-# - ✅ Visual C++ tools
-# - ✅ Visual Basic build tools
-
-# Run inside x64 Native Tools Command Prompt for VS 2022
-# 使用「x64 Native Tools Command Prompt for VS 2022」執行下列：
-pip install llama-cpp-python
+pip install huggingface_hub
+huggingface-cli download TheBloke/Mistral-7B-Instruct-v0.2-GGUF \
+  mistral-7b-instruct-v0.2.Q6_K.gguf --local-dir ./models
 ```
-
-> If you see `cl not found` or `CMake failed`, double-check you’re in the right build prompt.
-> 若出現 `cl` 或 `cmake configuration failed` 錯誤，請確認你是用正確的命令列工具。
 
 ---
 
-## 🚀 How to Use | 執行方式
+## 🏃 使用方式 | How to Use
 
 ```bash
 python rag_mistral.py
 ```
 
-You will see the CLI menu / 執行後會看到 CLI 選單：
-
+選單顯示如下：
 ```
 ====== RAG CLI System (Mistral 7B Q6_K + FAISS) ======
 1. Upload document (.txt/.pdf)
@@ -87,63 +73,62 @@ You will see the CLI menu / 執行後會看到 CLI 選單：
 3. Exit
 ```
 
-- Option 1 上傳 `.txt` 或 `.pdf`
-- Option 2 提問，系統會從文件中取出段落作答
+---
+
+## 📥 文件上傳與提問 | Upload & Ask
+
+1. 輸入 PDF 或 TXT 檔路徑（自動切段/摘要/index）
+2. 提問自然語言問題 → 回傳最佳答案段落 + 頁碼
 
 ---
 
-## 📥 Download Model | 模型下載
+## 🔧 進階技巧 | Advanced Tips
 
-```bash
-pip install huggingface_hub
-
-huggingface-cli download TheBloke/Mistral-7B-Instruct-v0.2-GGUF \
-  mistral-7b-instruct-v0.2.Q6_K.gguf --local-dir ./models
-```
-
-> ✅ Place the GGUF file in `./models` next to your script
-> ✅ 模型請放入 `./models` 資料夾，與主程式同層
+- `RecursiveCharacterTextSplitter` 用於安全分段，支援段落重疊
+- 對長段落自動摘要，可提升回覆精度（避免稀釋向量）
+- 向量編碼內容包括 chunk + metadata（如 page info）
+- 向量搜尋支援 top_k=5~10 彈性設定
 
 ---
 
-## 🧪 Example | 使用範例
+## 📝 requirements.txt 建議內容
 
-1. Upload a document (e.g. `manual.pdf`)
-2. Ask a question:
-
+```txt
+faiss-cpu
+PyMuPDF
+langchain
+sentence-transformers
+transformers
+llama-cpp-python
 ```
-What is the purpose of this document?
-```
-
-System will retrieve the best-matching paragraph and generate an answer using Mistral.
-系統會擷取段落並使用 LLM 回答
 
 ---
 
-## ⚠️ Notes | 注意事項
+## ⚠️ 注意事項
 
-- Add the following files to `.gitignore`:
-
-```
+- `.gitignore` 建議排除：
+```txt
 docs.index
 docs.txt
 models/
 ```
-
-- Avoid uploading sensitive or personal data
 - 請勿上傳機密或個資
 
 ---
 
-## 📄 License
+## 🧭 後續規劃 | Roadmap
 
-Apache 2.0 License
+- ✅ CLI 簡化流程與輸出排版
+- 📊 支援 CSV 輸出問答記錄
+- 📄 支援網頁前端版本（待開發）
+- 📷 支援圖像 PDF 或 OCR（將採用 VDR）
 
 ---
 
-## 🙌 Feedback | 回饋建議
+## 📄 License
+Apache 2.0
 
-If you like this project, ⭐ star it, fork it, or open an issue!
-如果你喜歡這個專案，歡迎按星星、複製、提出建議！
+---
 
-➡️ [GitHub Repository](https://github.com/HCCREN/rag-mistral)
+## 🙌 貢獻者
+Made with ❤️ by [@HCCREN](https://github.com/HCCREN)
