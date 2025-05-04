@@ -12,44 +12,46 @@
 
 ---
 
-## 🚀 功能總覽 | Features
+## 🚀 Features | 功能特色
 
-- 🧠 Mistral 7B (Q6_K, GGUF) 本地 LLM via `llama-cpp-python`
-- 🧾 PDF 多頁處理 + chunk 切割（使用 LangChain `RecursiveCharacterTextSplitter`）
-- 📝 長段落自動摘要（`distilbart`）提升效率與準確性
-- 🔍 內建 FAISS 向量資料庫支援 `top_k` 向量檢索
-- 📌 每段回答皆附帶原始 PDF 頁碼來源
-- 💻 離線運行、無需 GPU、支援 Windows（含安裝教學）
+- 🧠 Mistral 7B (Q6_K, GGUF) with `llama-cpp-python`
+- 🧾 Multi-page PDF reader + chunk splitter (`LangChain` `RecursiveCharacterTextSplitter`)
+- 📝 Automatic summarization for long passages using `distilbart`
+- 🔍 Vector search via FAISS with metadata-enhanced retrieval
+- 📌 Answer includes source page numbers
+- 💻 CPU only, fully offline, Windows compatible (Visual Studio required)
 
 ---
 
-## 🧰 環境需求 | Requirements
+## 🧰 Requirements | 環境需求
 
-- ✅ Python 3.10（強烈建議）
+- ✅ Python 3.10 (strongly recommended)
 - ✅ CMake
 - ✅ Visual Studio Build Tools 2022：
   - Windows 11 SDK
   - MSVC v143
-  - Visual C++ 與 Visual Basic Build Tools
+  - Visual C++ and Visual Basic Build Tools
 
 ---
 
-## 📦 安裝步驟 | Installation
+## 📦 Installation | 安裝
 
 ```bash
-# 建立虛擬環境
+# Create venv
 python -m venv env
 env\Scripts\activate  # Windows
 
-# 安裝套件
+# Install dependencies
 pip install -r requirements.txt
 ```
 
-> 若安裝 `llama-cpp-python` 失敗，請使用「x64 Native Tools Command Prompt for VS 2022」執行。
+> If `llama-cpp-python` build fails, use “x64 Native Tools Command Prompt for VS 2022”.
+
+> 若安裝失敗，請改用「x64 Native Tools Command Prompt for VS 2022」。
 
 ---
 
-## 🧠 模型下載 | Download Mistral Model
+## 🧠 Download the Model | 模型下載
 
 ```bash
 pip install huggingface_hub
@@ -59,13 +61,13 @@ huggingface-cli download TheBloke/Mistral-7B-Instruct-v0.2-GGUF \
 
 ---
 
-## 🏃 使用方式 | How to Use
+## 🏃 How to Use | 使用方式
 
 ```bash
 python rag_mistral.py
 ```
 
-選單顯示如下：
+Prompt menu:
 ```
 ====== RAG CLI System (Mistral 7B Q6_K + FAISS) ======
 1. Upload document (.txt/.pdf)
@@ -75,23 +77,23 @@ python rag_mistral.py
 
 ---
 
-## 📥 文件上傳與提問 | Upload & Ask
+## 📥 Upload & Ask | 上傳與提問
 
-1. 輸入 PDF 或 TXT 檔路徑（自動切段/摘要/index）
-2. 提問自然語言問題 → 回傳最佳答案段落 + 頁碼
-
----
-
-## 🔧 進階技巧 | Advanced Tips
-
-- `RecursiveCharacterTextSplitter` 用於安全分段，支援段落重疊
-- 對長段落自動摘要，可提升回覆精度（避免稀釋向量）
-- 向量編碼內容包括 chunk + metadata（如 page info）
-- 向量搜尋支援 top_k=5~10 彈性設定
+1. Upload your `.pdf` or `.txt` file — system will chunk + summarize + index
+2. Ask natural language questions — you get relevant answers with page numbers
 
 ---
 
-## 📝 requirements.txt 建議內容
+## 🔧 Advanced Tips | 進階技巧
+
+- Use `RecursiveCharacterTextSplitter` for safe chunking with overlap
+- Long paragraphs are auto-summarized before vectorizing
+- FAISS vectors include `chunk + metadata (e.g. page info)`
+- Top-k vector search for relevant context retrieval
+
+---
+
+## 📝 requirements.txt
 
 ```txt
 faiss-cpu
@@ -104,7 +106,7 @@ llama-cpp-python
 
 ---
 
-## ⚠️ 注意事項
+## ⚠️ Notes | 注意事項
 
 - `.gitignore` 建議排除：
 ```txt
@@ -112,16 +114,17 @@ docs.index
 docs.txt
 models/
 ```
-- 請勿上傳機密或個資
+- Do not upload private or sensitive data
+- 請勿上傳機密文件或個資
 
 ---
 
-## 🧭 後續規劃 | Roadmap
+## 🧭 Roadmap | 開發規劃
 
-- ✅ CLI 簡化流程與輸出排版
-- 📊 支援 CSV 輸出問答記錄
-- 📄 支援網頁前端版本（待開發）
-- 📷 支援圖像 PDF 或 OCR（將採用 VDR）
+- ✅ Improved CLI flow with page-tagged answers
+- 📊 CSV export for Q&A history (TBD)
+- 🌐 Web frontend (in progress)
+- 🖼️ OCR/Visual PDF support via VDR (future)
 
 ---
 
