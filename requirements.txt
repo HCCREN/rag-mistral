@@ -1,5 +1,6 @@
 faiss-cpu
+PyMuPDF
+langchain
 sentence-transformers
+transformers
 llama-cpp-python
-pymupdf
-numpy
