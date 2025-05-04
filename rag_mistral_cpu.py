@@ -1,97 +1,90 @@
-# rag_mistral.py
-# Full English version of a Python RAG CLI system using Mistral 7B Q6_K and FAISS
+# rag_mistral.py (code version)
+# 強化版：RecursiveChunk + Summary + Metadata Embedding
 
 import os
+import fitz  # PyMuPDF
 import faiss
-import time
-import fitz  # PyMuPDF, used for PDF parsing
 import numpy as np
-from pathlib import Path
-from llama_cpp import Llama
+from langchain.text_splitter import RecursiveCharacterTextSplitter
 from sentence_transformers import SentenceTransformer
+from transformers import pipeline
+from llama_cpp import Llama
 
-# Parameters
-EMBED_MODEL_NAME = "thenlper/gte-small"  # Embedding model
-GGUF_MODEL_PATH = "./models/mistral-7b-instruct-v0.2.Q6_K.gguf"  # Path to GGUF model
-VECTOR_DIM = 384  # Embedding dimension (gte-small)
-INDEX_PATH = "docs.index"
+# Load components
+embedder = SentenceTransformer("sentence-transformers/all-MiniLM-L6-v2")
+summarizer = pipeline("summarization", model="sshleifer/distilbart-cnn-12-6")  # lightweight summarizer
+llm = Llama(model_path="C://Ren//python//env//huggingface_LLM_Model//models//mistral-7b-instruct-v0.2.Q6_K.gguf", n_ctx=2048)
 
-# Load embedding model
-print("[1/5] Loading embedding model...")
-embedder = SentenceTransformer(EMBED_MODEL_NAME)
+# FAISS index init
+embedding_size = 384  # dimension of MiniLM
+index = faiss.IndexFlatL2(embedding_size)
+documents = []
 
-# Initialize or load vector database
-if os.path.exists(INDEX_PATH):
-    print("[2/5] Loading vector database...")
-    index = faiss.read_index(INDEX_PATH)
-    with open("docs.txt", "r", encoding="utf-8") as f:
-        doc_list = f.read().split("\n")
-else:
-    print("[2/5] Creating new vector database...")
-    index = faiss.IndexFlatIP(VECTOR_DIM)
-    doc_list = []
+# === Load PDF & Chunk with Metadata + Optional Summarization ===
+def add_document(path):
+    global documents
+    with fitz.open(path) as pdf:
+        for page_num in range(len(pdf)):
+            page = pdf.load_page(page_num)
+            text = page.get_text()
+            # Chunking
+            splitter = RecursiveCharacterTextSplitter(chunk_size=500, chunk_overlap=50)
+            chunks = splitter.split_text(text)
 
-# Load the LLaMA model
-print("[3/5] Launching LLaMA model...")
-llm = Llama(model_path=GGUF_MODEL_PATH, n_ctx=4096, n_threads=16)
+            for chunk in chunks:
+                if len(chunk) > 600:
+                    chunk = summarizer(chunk, max_length=150, min_length=40, do_sample=False)[0]['summary_text']
+                metadata = f"[Page {page_num+1}]"
+                documents.append((chunk, metadata))
 
-# Add document and index it
-def add_document(file_path):
-    print(f"[+] Adding document: {file_path}")
-
-    if file_path.lower().endswith(".pdf"):
-        print("[*] PDF detected. Parsing with PyMuPDF...")
-        doc = fitz.open(file_path)
-        content = ""
-        for page in doc:
-            content += page.get_text()
-    else:
-        with open(file_path, "r", encoding="utf-8", errors="ignore") as f:
-            content = f.read()
-
-    paragraphs = [p.strip() for p in content.split("\n") if len(p.strip()) > 30]
-
-    if len(paragraphs) == 0:
-        print("⚠️ The file does not contain any paragraph longer than 30 characters. Skipped.")
-        return
-
-    vectors = embedder.encode(paragraphs, normalize_embeddings=True)
+    # Embed & index
+    vectors = [embedder.encode(chunk + " " + meta) for chunk, meta in documents]
     index.add(np.array(vectors))
-    doc_list.extend(paragraphs)
-    faiss.write_index(index, INDEX_PATH)
-    with open("docs.txt", "w", encoding="utf-8") as f:
-        f.write("\n".join(doc_list))
-    print(f"[+] Added {len(paragraphs)} new paragraphs to the vector DB.\n")
 
-# Ask a question and get answer from LLM
-def ask_question(query, top_k=3):
-    q_embed = embedder.encode([query], normalize_embeddings=True)
-    D, I = index.search(np.array(q_embed), top_k)
-    related = [doc_list[i] for i in I[0]]
-    context = "\n".join(related)
-    prompt = f"The following context was retrieved:\n{context}\n\nBased on the above, answer the question: {query}"
-    print("[4/5] LLM is thinking...")
-    response = llm(prompt, max_tokens=512, stop=["</s>"])
-    print("\n[Answer]", response["choices"][0]["text"].strip())
 
-# CLI Interface
-if __name__ == "__main__":
+# === Search + Prompt Mistral ===
+def ask_question(question, top_k=5):
+    q_embedding = embedder.encode(question)
+    D, I = index.search(np.array([q_embedding]), top_k)
+
+    context = ""
+    for idx in I[0]:
+        chunk, meta = documents[idx]
+        context += f"{meta}\n{chunk}\n\n"
+
+    prompt = f"### Instruction:\nUse the context to answer the question.\n\n### Context:\n{context}\n\n### Question:\n{question}\n\n### Answer:\n"
+    output = llm(prompt, max_tokens=512, stop=["###"])
+    print("\n\033[92mAnswer:\033[0m", output["choices"][0]["text"].strip())
+
+
+# === CLI ===
+def main():
     while True:
         print("\n====== RAG CLI System (Mistral 7B Q6_K + FAISS) ======")
         print("1. Upload document (.txt/.pdf)")
         print("2. Ask a question")
         print("3. Exit")
-        choice = input("Choose an option: ").strip()
-        if choice == "1":
-            path = input("Enter .txt or .pdf file path: ").strip()
-            if os.path.exists(path):
+        choice = input("Please select: ")
+
+        if choice == '1':
+            path = input("Enter path to document: ")
+            if os.path.isfile(path):
                 add_document(path)
+                print("Document added successfully.")
             else:
-                print("File not found!")
-        elif choice == "2":
-            q = input("Enter your question: ")
+                print("File not found.")
+
+        elif choice == '2':
+            if not documents:
+                print("Please upload document first.")
+                continue
+            q = input("Ask your question: ")
             ask_question(q)
-        elif choice == "3":
+
+        elif choice == '3':
             break
         else:
-            print("Invalid option. Please try again.")
+            print("Invalid option.")
+
+if __name__ == '__main__':
+    main()
