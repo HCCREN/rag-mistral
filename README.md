@@ -1,7 +1,7 @@
 # README.md（根據最新版 Python 程式碼同步）
 
 <p align="center">
-  <img src="https://raw.githubusercontent.com/HCCREN/rag-mistral-cli/main/banner1.png" alt="RAG Mistral CLI Banner" width="100%">
+  <img src="https://raw.githubusercontent.com/HCCREN/rag-mistral/main/banner1.png" alt="RAG Mistral CLI Banner" width="100%">
 </p>
 
 <h1 align="center">📚 RAG-Mistral-CLI | 高效離線文件問答系統</h1>
