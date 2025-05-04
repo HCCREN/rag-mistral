@@ -109,5 +109,5 @@ Apache 2.0 License
 If you like this project, ⭐ star it, fork it, or open an issue!
 如果你喜歡這個專案，歡迎按星星、複製、提出建議！
 
-➡️ [GitHub Repository](https://github.com/HCCREN/rag-mistral-cli)
+➡️ [GitHub Repository](https://github.com/HCCREN/rag-mistral)
 
