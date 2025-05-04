@@ -26,12 +26,49 @@
 
 ## 🧰 Requirements | 環境需求
 
-- Python 3.10+
-- Install dependencies 安裝套件：
+- ✅ Python 3.10 (strongly recommended)
+- ✅ CMake
+- ✅ Visual Studio Build Tools 2022 with:
+  - ✅ Windows 11 SDK (10.0.22000.0 or higher 可接受)
+  - ✅ MSVC v143 - VS 2022 C++ x64/x86 build tools
+  - ✅ **Visual C++ tools** and **Visual Basic build tools** (必要！)
+
+- 安裝所需套件：
 
 ```bash
 pip install -r requirements.txt
 ```
+
+---
+
+## 🛠 llama-cpp-python Installation (Windows 安裝指引 / English + 中文)
+
+If you get build errors while installing `llama-cpp-python`, follow these steps:
+若你在安裝 `llama-cpp-python` 遇到錯誤，請依下列步驟安裝：
+
+```bash
+# Create Python 3.10 virtual environment / 建立 Python 虛擬環境
+python -m venv env
+env\Scripts\activate
+
+# Upgrade pip and install cmake / 更新 pip 並安裝 cmake
+python -m pip install --upgrade pip
+pip install cmake
+
+# ✅ Install Visual Studio Build Tools (via installer)
+# 必選項目：
+# - ✅ Windows 10 或 Windows 11 SDK (>= 10.0.22000.0)
+# - ✅ MSVC v143 (VS 2022 C++ x64/x86 build tools)
+# - ✅ Visual C++ tools
+# - ✅ Visual Basic build tools
+
+# Run inside x64 Native Tools Command Prompt for VS 2022
+# 使用「x64 Native Tools Command Prompt for VS 2022」執行下列：
+pip install llama-cpp-python
+```
+
+> If you see `cl not found` or `CMake failed`, double-check you’re in the right build prompt.
+> 若出現 `cl` 或 `cmake configuration failed` 錯誤，請確認你是用正確的命令列工具。
 
 ---
 
@@ -110,4 +147,3 @@ If you like this project, ⭐ star it, fork it, or open an issue!
 如果你喜歡這個專案，歡迎按星星、複製、提出建議！
 
 ➡️ [GitHub Repository](https://github.com/HCCREN/rag-mistral)
-
